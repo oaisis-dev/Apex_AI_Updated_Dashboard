@@ -55,26 +55,26 @@ export default function App() {
 
           {/* Tab Navigation */}
           <nav className="flex gap-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative px-6 py-3 rounded-t-lg transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex flex-col items-start">
-                  <span className="text-sm">{tab.label}</span>
-                  <span className="text-xs opacity-60">{tab.subtitle}</span>
-                </div>
-                {activeTab === tab.id && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]"></div>
-                )}
-              </button>
-            ))}
-          </nav>
+  {tabs.map((tab) => (
+    <button
+      key={tab.id}
+      onClick={() => setActiveTab(tab.id)}
+      className={`relative px-6 py-3 rounded-t-lg transition-all flex-1 ${
+        activeTab === tab.id
+          ? 'bg-blue-50 text-blue-600'
+          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+      }`}
+    >
+      <div className="flex flex-col items-start">
+        <span className="text-sm">{tab.label}</span>
+        <span className="text-xs opacity-60">{tab.subtitle}</span>
+      </div>
+      {activeTab === tab.id && (
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]"></div>
+      )}
+    </button>
+  ))}
+</nav>
         </div>
       </header>
 
