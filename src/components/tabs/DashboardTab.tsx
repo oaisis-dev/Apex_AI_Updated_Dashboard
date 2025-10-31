@@ -1,10 +1,15 @@
-import { TrendingUp, TrendingDown, Home, DollarSign, Percent, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Home, DollarSign, Percent, AlertTriangle, CheckCircle2, Clock, Send, Sparkles, MessageSquare, Wrench, CalendarDays, Users, TrendingUp as TrendingUpIcon, FileText, Activity, ExternalLink, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import KPICard from '../KPICard';
 import appfolioLogo from 'figma:asset/3a6d81a31ad558228c2d8de51413df7a7c90efb5.png';
 import quickbooksLogo from 'figma:asset/a11d79feecd4efd1298811d8281b3c6a77a02bd4.png';
 import mapBackground from 'figma:asset/8634896c15c680d0efedceab288687e21d01cfb1.png';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Progress } from '../ui/progress';
+import { Badge } from '../ui/badge';
+import { ScrollArea } from '../ui/scroll-area';
 
 // Sparkline data for NOI trend (last 12 months)
 const noiSparklineData = [3.2, 3.5, 3.4, 3.8, 4.0, 3.9, 4.1, 4.3, 4.2, 4.4, 4.5, 4.7];
@@ -38,16 +43,65 @@ const activities = [
 ];
 
 const aiAlerts = [
-  { id: 1, severity: 'high', message: 'HVAC maintenance trending 40% higher than normal', property: 'Indian Trail Apartments', icon: AlertTriangle },
-  { id: 2, severity: 'medium', message: 'Occupancy below 95% at Lakeview Apartments', property: 'Lakeview Apartments', icon: TrendingDown },
-  { id: 3, severity: 'low', message: 'Lease expiration spike in Q1 2026 - consider early renewals', property: 'Portfolio-wide', icon: Clock },
+  { 
+    id: 1, 
+    severity: 'high', 
+    emoji: '⚠️',
+    message: 'College Park: Water bill spiked 20% MoM (+$500 vs. avg). Investigate potential leak.', 
+    property: 'College Park Apartments', 
+    icon: AlertTriangle,
+    actions: ['View Details', 'Assign Task']
+  },
+  { 
+    id: 2, 
+    severity: 'medium', 
+    emoji: '🔔',
+    message: '7700 Indian Trail: Lease expiring in 60 days for Unit 3B (Tenant: J. Doe). Initiate renewal workflow?', 
+    property: 'Indian Trail Apartments', 
+    icon: Clock,
+    actions: ['Start Renewal', 'View Lease']
+  },
+  { 
+    id: 3, 
+    severity: 'high', 
+    emoji: '📈',
+    message: 'Partition St: NOI is 8% ahead of budget YTD. Driven by lower utility costs.', 
+    property: 'Partition Street Complex', 
+    icon: TrendingUp,
+    actions: ['View Report', 'Dismiss']
+  },
+  { 
+    id: 4, 
+    severity: 'medium', 
+    emoji: '🔧',
+    message: 'Lakeview Apartments: 3 HVAC work orders opened this week. Preventive maintenance may be needed.', 
+    property: 'Lakeview Apartments', 
+    icon: Wrench,
+    actions: ['Schedule PM', 'View Orders']
+  },
+  { 
+    id: 5, 
+    severity: 'low', 
+    emoji: '💰',
+    message: 'Main Street Complex: Rent collection at 98.5% - exceeding portfolio average.', 
+    property: 'Main Street Complex', 
+    icon: CheckCircle2,
+    actions: ['Dismiss']
+  },
 ];
 
 const properties = [
-  { id: 1, name: 'Lakeview Apartments', lat: 35.2271, lng: -80.8431, units: 124, occupancy: 93.5 },
-  { id: 2, name: 'College Park Apts', lat: 35.1374, lng: -80.7453, units: 86, occupancy: 97.2 },
-  { id: 3, name: 'Indian Trail Property', lat: 35.0768, lng: -80.6698, units: 142, occupancy: 96.8 },
-  { id: 4, name: 'Main Street Complex', lat: 35.2082, lng: -80.8304, units: 98, occupancy: 98.5 },
+  { id: 1, name: 'Lakeview Apartments', lat: 35.2271, lng: -80.8431, units: 124, occupancy: 93.5, noiVsBudget: -2.1 },
+  { id: 2, name: 'College Park Apts', lat: 35.1374, lng: -80.7453, units: 86, occupancy: 97.2, noiVsBudget: 3.2 },
+  { id: 3, name: 'Indian Trail Property', lat: 35.0768, lng: -80.6698, units: 142, occupancy: 96.8, noiVsBudget: 1.8 },
+  { id: 4, name: 'Main Street Complex', lat: 35.2082, lng: -80.8304, units: 98, occupancy: 98.5, noiVsBudget: 5.4 },
+];
+
+const suggestedPrompts = [
+  "Show properties below 95% occupancy",
+  "What's the YTD R&M spend?",
+  "List leases expiring next 90 days",
+  "Which property has highest NOI variance?"
 ];
 
 export default function DashboardTab() {
@@ -129,11 +183,55 @@ export default function DashboardTab() {
         />
       </div>
 
+      {/* AI Interaction Interface */}
+      <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 shadow-sm">
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-lg bg-blue-500">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-slate-900">Ask Apex AI</h3>
+                <p className="text-xs text-slate-600">Natural language commands & analytics</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input 
+                  placeholder="Ask Apex AI... (e.g., 'Show me properties with high maintenance costs')"
+                  className="pl-10 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {suggestedPrompts.map((prompt, index) => (
+                <Button 
+                  key={index}
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs bg-white hover:bg-blue-50 border-slate-300 text-slate-700"
+                >
+                  {prompt}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Interactive Map */}
         <Card className="bg-white border-slate-200 shadow-sm lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-slate-900">Portfolio Map</CardTitle>
+            <p className="text-xs text-slate-600 mt-1">Color-coded by occupancy: 🟢 95%+ | 🟡 90-95% | 🔴 &lt;90%</p>
           </CardHeader>
           <CardContent>
             <div className="relative w-full h-[400px] rounded-lg overflow-hidden border border-slate-200">
@@ -148,10 +246,24 @@ export default function DashboardTab() {
                 <div className="absolute inset-0 bg-slate-900/20"></div>
               </div>
               
-              {/* Property Pins with Circuit Style */}
+              {/* Property Pins with Circuit Style - Color Coded by Occupancy */}
               {properties.map((property, index) => {
                 const x = 150 + index * 150;
                 const y = 120 + (index % 2) * 120;
+                
+                // Color code based on occupancy
+                const pinColor = property.occupancy >= 95 
+                  ? 'bg-green-500 border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.8)]' 
+                  : property.occupancy >= 90 
+                  ? 'bg-yellow-500 border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.8)]'
+                  : 'bg-red-500 border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.8)]';
+                
+                const glowColor = property.occupancy >= 95 
+                  ? 'bg-green-500/20' 
+                  : property.occupancy >= 90 
+                  ? 'bg-yellow-500/20'
+                  : 'bg-red-500/20';
+                
                 return (
                   <div
                     key={property.id}
@@ -159,22 +271,39 @@ export default function DashboardTab() {
                     style={{ left: `${x}px`, top: `${y}px` }}
                   >
                     {/* Circuit Glow Effect */}
-                    <div className="absolute -inset-4 bg-blue-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className={`absolute -inset-4 ${glowColor} rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity`}></div>
                     
                     {/* Pin */}
                     <div className="relative">
-                      <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.8)]">
-                        <div className="absolute inset-0 rounded-full bg-blue-400 animate-ping opacity-75"></div>
+                      <div className={`w-4 h-4 rounded-full border-2 ${pinColor}`}>
+                        <div className={`absolute inset-0 rounded-full ${property.occupancy >= 95 ? 'bg-green-400' : property.occupancy >= 90 ? 'bg-yellow-400' : 'bg-red-400'} animate-ping opacity-75`}></div>
                       </div>
                       
                       {/* Info Card on Hover */}
                       <div className="absolute top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                        <div className="bg-white border border-slate-300 rounded-lg p-3 shadow-xl min-w-[200px]">
+                        <div className="bg-white border border-slate-300 rounded-lg p-3 shadow-xl min-w-[220px]">
                           <div className="text-sm text-slate-900 mb-2">{property.name}</div>
                           <div className="text-xs text-slate-600 space-y-1">
-                            <div>Units: {property.units}</div>
-                            <div>Occupancy: {property.occupancy}%</div>
+                            <div className="flex justify-between">
+                              <span>Units:</span>
+                              <span>{property.units}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Occupancy:</span>
+                              <span className={property.occupancy >= 95 ? 'text-green-600' : property.occupancy >= 90 ? 'text-yellow-600' : 'text-red-600'}>
+                                {property.occupancy}%
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>NOI vs Budget:</span>
+                              <span className={property.noiVsBudget >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                {property.noiVsBudget >= 0 ? '+' : ''}{property.noiVsBudget}%
+                              </span>
+                            </div>
                           </div>
+                          <Button size="sm" variant="outline" className="w-full mt-2 text-xs h-7">
+                            View Details <ChevronRight className="w-3 h-3 ml-1" />
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -185,43 +314,52 @@ export default function DashboardTab() {
           </CardContent>
         </Card>
 
-        {/* AI Alerts Module */}
+        {/* AI Alerts & Notifications Feed */}
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader>
             <CardTitle className="text-slate-900 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-              AI Predictive Alerts
+              AI Alerts & Notifications
             </CardTitle>
+            <p className="text-xs text-slate-600 mt-1">5 active alerts requiring attention</p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {aiAlerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className={`p-4 rounded-lg border transition-all hover:shadow-sm ${
-                    alert.severity === 'high'
-                      ? 'bg-red-50 border-red-200'
-                      : alert.severity === 'medium'
-                      ? 'bg-yellow-50 border-yellow-200'
-                      : 'bg-blue-50 border-blue-200'
-                  }`}
-                >
-                  <div className="flex gap-3">
-                    <alert.icon className={`w-5 h-5 flex-shrink-0 ${
+            <ScrollArea className="h-[352px] pr-4">
+              <div className="space-y-3">
+                {aiAlerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className={`p-4 rounded-lg border transition-all hover:shadow-sm ${
                       alert.severity === 'high'
-                        ? 'text-red-600'
+                        ? 'bg-red-50 border-red-200'
                         : alert.severity === 'medium'
-                        ? 'text-yellow-600'
-                        : 'text-blue-600'
-                    }`} />
-                    <div className="flex-1">
-                      <div className="text-sm text-slate-900 mb-1">{alert.message}</div>
-                      <div className="text-xs text-slate-600">{alert.property}</div>
+                        ? 'bg-yellow-50 border-yellow-200'
+                        : 'bg-blue-50 border-blue-200'
+                    }`}
+                  >
+                    <div className="flex gap-3 mb-3">
+                      <span className="text-xl flex-shrink-0">{alert.emoji}</span>
+                      <div className="flex-1">
+                        <div className="text-sm text-slate-900 mb-1">{alert.message}</div>
+                        <div className="text-xs text-slate-600">{alert.property}</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {alert.actions.map((action, idx) => (
+                        <Button 
+                          key={idx}
+                          size="sm" 
+                          variant={idx === 0 ? "default" : "outline"}
+                          className={`text-xs h-7 ${idx === 0 ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'border-slate-300'}`}
+                        >
+                          {action}
+                        </Button>
+                      ))}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
@@ -291,6 +429,171 @@ export default function DashboardTab() {
                   <span className="text-sm text-slate-600">{item.value}%</span>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Operational Widgets Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Leasing Summary Widget */}
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-slate-900 flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-600" />
+              Leasing Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-600">Units Leased MTD</span>
+                  <span className="text-slate-900">14 / 18 goal</span>
+                </div>
+                <Progress value={78} className="h-2" />
+                <p className="text-xs text-slate-500 mt-1">78% of monthly target</p>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-600">Units Leased YTD</span>
+                  <span className="text-slate-900">142 / 180 goal</span>
+                </div>
+                <Progress value={79} className="h-2" />
+                <p className="text-xs text-slate-500 mt-1">79% of annual target</p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-600">Avg. Days on Market</span>
+                  <span className="text-lg text-slate-900">18</span>
+                </div>
+                <p className="text-xs text-green-600">↓ 3 days vs. last month</p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200">
+                <div className="text-sm text-slate-600 mb-3">Upcoming Lease Expirations</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <div className="text-lg text-slate-900">8</div>
+                    <div className="text-xs text-slate-600">Next 30d</div>
+                  </div>
+                  <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <div className="text-lg text-slate-900">15</div>
+                    <div className="text-xs text-slate-600">Next 60d</div>
+                  </div>
+                  <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <div className="text-lg text-slate-900">23</div>
+                    <div className="text-xs text-slate-600">Next 90d</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Maintenance Snapshot Widget */}
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-slate-900 flex items-center gap-2">
+              <Wrench className="w-5 h-5 text-orange-600" />
+              Maintenance Snapshot
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <div className="text-sm text-slate-600 mb-3">Open Work Orders by Priority</div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg border border-red-200">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="destructive" className="bg-red-600">High</Badge>
+                      <span className="text-sm text-slate-900">Urgent</span>
+                    </div>
+                    <span className="text-slate-900">7</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-yellow-600">Medium</Badge>
+                      <span className="text-sm text-slate-900">Standard</span>
+                    </div>
+                    <span className="text-slate-900">24</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-blue-600">Low</Badge>
+                      <span className="text-sm text-slate-900">Routine</span>
+                    </div>
+                    <span className="text-slate-900">15</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-600">Overdue Work Orders</span>
+                  <span className="text-lg text-red-600">3</span>
+                </div>
+                <p className="text-xs text-slate-500">Requires immediate attention</p>
+              </div>
+
+              <Button variant="outline" className="w-full border-slate-300 text-slate-700" size="sm">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Open AppFolio Maintenance
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Links/Actions Widget */}
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-slate-900 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-purple-600" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start border-slate-300 text-slate-700 hover:bg-blue-50" size="sm">
+                <FileText className="w-4 h-4 mr-2" />
+                Run Portfolio Rent Roll
+              </Button>
+              <Button variant="outline" className="w-full justify-start border-slate-300 text-slate-700 hover:bg-blue-50" size="sm">
+                <DollarSign className="w-4 h-4 mr-2" />
+                View Portfolio Delinquency
+              </Button>
+              <Button variant="outline" className="w-full justify-start border-slate-300 text-slate-700 hover:bg-blue-50" size="sm">
+                <TrendingUpIcon className="w-4 h-4 mr-2" />
+                Initiate Month-End Reporting
+              </Button>
+              <Button variant="outline" className="w-full justify-start border-slate-300 text-slate-700 hover:bg-blue-50" size="sm">
+                <CalendarDays className="w-4 h-4 mr-2" />
+                Schedule Portfolio Inspection
+              </Button>
+              <Button variant="outline" className="w-full justify-start border-slate-300 text-slate-700 hover:bg-blue-50" size="sm">
+                <Users className="w-4 h-4 mr-2" />
+                Export Tenant Contact List
+              </Button>
+              <Button variant="outline" className="w-full justify-start border-slate-300 text-slate-700 hover:bg-blue-50" size="sm">
+                <Home className="w-4 h-4 mr-2" />
+                Generate Occupancy Report
+              </Button>
+              
+              <div className="pt-2 mt-4 border-t border-slate-200">
+                <p className="text-xs text-slate-600 mb-2">Recent Exports</p>
+                <div className="space-y-1">
+                  <div className="text-xs text-slate-500 flex justify-between">
+                    <span>Portfolio_Summary_Oct.pdf</span>
+                    <span>2h ago</span>
+                  </div>
+                  <div className="text-xs text-slate-500 flex justify-between">
+                    <span>Q3_Financial_Report.xlsx</span>
+                    <span>1d ago</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
